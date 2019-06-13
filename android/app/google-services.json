@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "258717208398",
+    "firebase_url": "https://george-28a73.firebaseio.com",
+    "project_id": "george-28a73",
+    "storage_bucket": "george-28a73.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258717208398:android:6d44c210bcb798df",
+        "android_client_info": {
+          "package_name": "yhh.com.george"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258717208398-6cojisj4hq9e51qoj28pkrn7288m4stb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuUW5HBbO_UjaRWaYeVb-p5WC_Qa4HLSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258717208398-6i90tuht3h8cur97g06ujo1n43phb4cr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258717208398:android:6355609eb9c80c1d",
+        "android_client_info": {
+          "package_name": "yhh.com.george.george_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258717208398-7hal1mq801qf73inb4r7q6fj3cagg44n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "yhh.com.george.george_flutter",
+            "certificate_hash": "d9a866dabb4e485478998d434a0730bec2bcff9b"
+          }
+        },
+        {
+          "client_id": "258717208398-6cojisj4hq9e51qoj28pkrn7288m4stb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuUW5HBbO_UjaRWaYeVb-p5WC_Qa4HLSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258717208398-6i90tuht3h8cur97g06ujo1n43phb4cr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
