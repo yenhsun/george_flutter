@@ -7,9 +7,7 @@ class SignInScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Sign in'),
       ),
-      body: Center(
-        child: GoogleSignInButton()
-      ),
+      body: Center(child: GoogleSignInButton()),
     );
   }
 }
@@ -22,12 +20,21 @@ class GoogleSignInButton extends StatelessWidget {
       color: Color.fromARGB(0xff, 0x42, 0x85, 0xF4),
       padding: EdgeInsets.fromLTRB(10, 4, 10, 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+//        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
+//        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Icon(Icons.add),
-          Text('Sign in with Google', textAlign: TextAlign.center,)
+          new Image.asset(
+            'assets/ic_google_white_24dp.png',
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(2, 0, 6, 0)
+          ),
+          Text(
+            'Sign in with Google',
+            textAlign: TextAlign.center,
+          )
         ],
       ),
       onPressed: () {
@@ -36,5 +43,4 @@ class GoogleSignInButton extends StatelessWidget {
       },
     );
   }
-
 }
