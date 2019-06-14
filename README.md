@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/yenhsun/george_flutter.svg?style=svg)](https://circleci.com/gh/yenhsun/george_flutter)
+
 # george_flutter
 
 George
