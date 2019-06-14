@@ -1,25 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rxdart/rxdart.dart';
+
+class AuthData {
+  GoogleSignInAccount googleSignInAccount;
+  GoogleSignInAuthentication googleSignInAuthentication;
+
+  AuthData(GoogleSignInAccount googleSignInAccount,
+      GoogleSignInAuthentication googleSignInAuthentication)
+      : this.googleSignInAccount = googleSignInAccount,
+        this.googleSignInAuthentication = googleSignInAuthentication;
+}
 
 class Auth {
-  Auth({
-    @required this.googleSignIn,
-    @required this.firebaseAuth,
-  });
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  
+  Observable<bool> isSignIn() {
+    return Observable.fromFuture(_googleSignIn.isSignedIn());
+  }
 
-  final GoogleSignIn googleSignIn;
-  final FirebaseAuth firebaseAuth;
+  Observable<AuthData> signIn() {
+    return Observable.fromFuture(_googleSignIn.signIn())
+        .concatMap((GoogleSignInAccount account) {
+      return Observable.fromFuture(account.authentication)
+          .map((GoogleSignInAuthentication auth) {
+            final rtn = AuthData(account, auth);
+            debugPrint("AuthData: $rtn");
+        return rtn;
+      });
+    });
+  }
 
-  Future<FirebaseUser> signInWithGoogle() async {
-    final GoogleSignInAccount googleAccount = await googleSignIn.signIn();
-    debugPrint("googleAccount: $googleAccount");
-    final GoogleSignInAuthentication googleAuth =
-    await googleAccount.authentication;
-    debugPrint("googleAuth: $googleAuth");
-    return firebaseAuth.signInWithGoogle(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+  Observable<GoogleSignInAccount> signOut() {
+    return Observable.fromFuture(_googleSignIn.signOut());
   }
 }
