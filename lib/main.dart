@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:george_flutter/screen/favoriteitem/screen_favorite_item.dart';
+import 'package:george_flutter/screen/favoritelist/screen_favorite_list.dart';
 import 'package:george_flutter/screen/map/screen_map.dart';
 import 'screen/route_paths.dart';
 import 'package:george_flutter/screen/sign_in/screen_sign_in.dart';
@@ -14,6 +17,8 @@ Future main() async {
 
   Fimber.plantTree(DebugTree());
 
+  Firestore.instance.settings(timestampsInSnapshotsEnabled: true);
+
   runApp(MaterialApp(
     title: "Sign in",
     debugShowCheckedModeBanner: false,
@@ -21,6 +26,8 @@ Future main() async {
     routes: {
       ScreenPath.sign_in_screen: (context) => SignInScreen(),
       ScreenPath.map_screen: (context) => MapScreen(),
+      ScreenPath.favorite_list_screen: (context) => FavoriteListScreen(),
+      ScreenPath.favorite_item_screen: (context) => FavoriteItemScreen(),
     },
   ));
 }

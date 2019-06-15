@@ -2,6 +2,7 @@ import 'package:fimber/fimber.dart';
 import 'package:flutter/material.dart';
 import 'package:george_flutter/screen/sign_in/util/auth.dart';
 import 'package:george_flutter/util/firebase_helper.dart';
+import 'package:george_flutter/util/view/loading.dart';
 import 'package:toast/toast.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -42,8 +43,9 @@ class _SignInScreenContainerState extends State<_SignInScreenContainer> {
   }
 
   void _initInternal() {
-    _signInIntent.listen((intent) {
-      Fimber.v("receive sign in intent");
+    _signInIntent.doOnEach((dynamic) {
+      debugPrint("receive sign in intent");
+    }).listen((intent) {
       _auth.signIn().doOnListen(() {
         setState(() {
           _isSingingIn = true;
@@ -51,13 +53,13 @@ class _SignInScreenContainerState extends State<_SignInScreenContainer> {
       }).listen((data) {
         // clear all previous
         Navigator.pushNamedAndRemoveUntil(
-            context, ScreenPath.map_screen, ModalRoute.withName(""));
+            context, ScreenPath.favorite_list_screen, ModalRoute.withName(""));
         Toast.show("Hi ${data.googleSignInAccount.displayName}", context,
             duration: Toast.LENGTH_LONG);
       }, onError: (error) {
         setState(() {
           _isSingingIn = false;
-          _error = error;
+          _error = error.toString();
         });
       });
     });
@@ -66,6 +68,7 @@ class _SignInScreenContainerState extends State<_SignInScreenContainer> {
   @override
   void initState() {
     super.initState();
+    debugPrint("initState screen sign in");
     _initInternal();
     _auth.isSignIn().doOnListen(() {
       setState(() {
@@ -73,6 +76,7 @@ class _SignInScreenContainerState extends State<_SignInScreenContainer> {
         _isSingingIn = false;
       });
     }).listen((isSignIn) {
+      debugPrint("isSignIn: $isSignIn");
       _error = null;
       if (isSignIn) {
         Fimber.v('get account & go to next screen');
@@ -128,9 +132,9 @@ class _SignInScreenContainerBranch extends StatelessWidget {
     if (error != null) {
       return _Error(error);
     } else if (isCheckingAccount) {
-      return _Loading(text: "Checking account...");
+      return CircularProgressBar(text: "Checking account...");
     } else if (isSingingIn) {
-      return _Loading(text: "Signing in...");
+      return CircularProgressBar(text: "Signing in...");
     } else {
       return _SignInButton(
         signInIntent: signInIntent,
@@ -150,23 +154,7 @@ class _Error extends StatelessWidget {
   }
 }
 
-class _Loading extends StatelessWidget {
-  final String text;
 
-  _Loading({@required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        CircularProgressIndicator(),
-        Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 16)),
-        Text(text),
-      ],
-    );
-  }
-}
 
 class _SignInButton extends StatelessWidget {
   final PublishSubject<void> signInIntent;
@@ -194,7 +182,7 @@ class _SignInButton extends StatelessWidget {
         ],
       ),
       onPressed: () {
-        Fimber.v("request sign in");
+        debugPrint("request sign in");
         signInIntent.add({});
       },
     );
