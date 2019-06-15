@@ -5,6 +5,8 @@ import 'package:george_flutter/util/firebase_helper.dart';
 import 'package:toast/toast.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../route_paths.dart';
+
 class SignInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -47,12 +49,11 @@ class _SignInScreenContainerState extends State<_SignInScreenContainer> {
           _isSingingIn = true;
         });
       }).listen((data) {
-        setState(() {
-          _isSingingIn = false;
-          _authData = data;
-          _error = null;
-        });
-        Toast.show("Hi ${data.googleSignInAccount.displayName}", context, duration: Toast.LENGTH_LONG);
+        // clear all previous
+        Navigator.pushNamedAndRemoveUntil(
+            context, ScreenPath.map_screen, ModalRoute.withName(""));
+        Toast.show("Hi ${data.googleSignInAccount.displayName}", context,
+            duration: Toast.LENGTH_LONG);
       }, onError: (error) {
         setState(() {
           _isSingingIn = false;

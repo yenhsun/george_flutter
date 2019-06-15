@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:george_flutter/screen/map/screen_map.dart';
 import 'screen/route_paths.dart';
-import 'package:george_flutter/screen/sign_in/sign_in.dart';
+import 'package:george_flutter/screen/sign_in/screen_sign_in.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fimber/fimber.dart';
 
@@ -19,6 +20,7 @@ Future main() async {
     initialRoute: ScreenPath.sign_in_screen,
     routes: {
       ScreenPath.sign_in_screen: (context) => SignInScreen(),
+      ScreenPath.map_screen: (context) => MapScreen(),
     },
   ));
 }
