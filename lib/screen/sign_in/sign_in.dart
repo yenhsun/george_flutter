@@ -1,5 +1,7 @@
+import 'package:fimber/fimber.dart';
 import 'package:flutter/material.dart';
 import 'package:george_flutter/screen/sign_in/util/auth.dart';
+import 'package:george_flutter/util/firebase_helper.dart';
 import 'package:toast/toast.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -39,7 +41,7 @@ class _SignInScreenContainerState extends State<_SignInScreenContainer> {
 
   void _initInternal() {
     _signInIntent.listen((intent) {
-      debugPrint("receive sign in intent");
+      Fimber.v("receive sign in intent");
       _auth.signIn().doOnListen(() {
         setState(() {
           _isSingingIn = true;
@@ -72,13 +74,13 @@ class _SignInScreenContainerState extends State<_SignInScreenContainer> {
     }).listen((isSignIn) {
       _error = null;
       if (isSignIn) {
-        debugPrint('get account & go to next screen');
+        Fimber.v('get account & go to next screen');
         setState(() {
           _error = null;
         });
         _signInIntent.add({});
       } else {
-        debugPrint('show sign in button');
+        Fimber.v('show sign in button');
         setState(() {
           _error = null;
         });
@@ -191,7 +193,7 @@ class _SignInButton extends StatelessWidget {
         ],
       ),
       onPressed: () {
-        debugPrint("request sign in");
+        Fimber.v("request sign in");
         signInIntent.add({});
       },
     );

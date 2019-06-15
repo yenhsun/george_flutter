@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screen/route_paths.dart';
 import 'package:george_flutter/screen/sign_in/sign_in.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:fimber/fimber.dart';
 
 Future main() async {
   Crashlytics.instance.enableInDevMode = true;
@@ -9,6 +10,8 @@ Future main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
     Crashlytics.instance.onError(details);
   };
+
+  Fimber.plantTree(DebugTree());
 
   runApp(MaterialApp(
     title: "Sign in",

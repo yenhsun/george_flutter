@@ -1,20 +1,13 @@
+import 'package:fimber/fimber.dart';
 import 'package:flutter/material.dart';
+import 'package:george_flutter/util/firebase_helper.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
 
-class AuthData {
-  GoogleSignInAccount googleSignInAccount;
-  GoogleSignInAuthentication googleSignInAuthentication;
-
-  AuthData(GoogleSignInAccount googleSignInAccount,
-      GoogleSignInAuthentication googleSignInAuthentication)
-      : this.googleSignInAccount = googleSignInAccount,
-        this.googleSignInAuthentication = googleSignInAuthentication;
-}
-
 class Auth {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  
+  final FirebaseUser _firebaseUser = FirebaseUser();
+
   Observable<bool> isSignIn() {
     return Observable.fromFuture(_googleSignIn.isSignedIn());
   }
@@ -24,9 +17,16 @@ class Auth {
         .concatMap((GoogleSignInAccount account) {
       return Observable.fromFuture(account.authentication)
           .map((GoogleSignInAuthentication auth) {
-            final rtn = AuthData(account, auth);
-            debugPrint("AuthData: $rtn");
-        return rtn;
+        return AuthData(account, auth);
+      }).doOnEach((notification) {
+        if (notification.error == null) {
+          Fimber.d("update authData");
+          _firebaseUser.authData = notification.value;
+        }
+      }).concatMap((authData) {
+        return _firebaseUser.updateUser().map((dynamic) {
+          return authData;
+        });
       });
     });
   }
