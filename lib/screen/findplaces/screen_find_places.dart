@@ -5,6 +5,7 @@ import 'package:fimber/fimber.dart';
 import 'package:flutter/material.dart';
 import 'package:george_flutter/model/model_favorite.dart';
 import 'package:george_flutter/screen/sign_in/util/auth.dart';
+import 'package:george_flutter/util/favorite_item_row.dart';
 import 'package:george_flutter/util/firebase_helper.dart';
 import 'package:george_flutter/util/map_helper.dart' as MapHelper;
 import 'package:george_flutter/util/map_helper.dart';
@@ -18,18 +19,23 @@ import 'package:toast/toast.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 class FindPlaceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _FindPlaceScreenContainer();
+    return _FindPlaceScreenContainer(ModalRoute.of(context).settings.arguments);
   }
 }
 
 class _FindPlaceScreenContainer extends StatefulWidget {
+  final FavoriteList _favoriteList;
+
+  _FindPlaceScreenContainer(this._favoriteList);
+
   @override
   State<StatefulWidget> createState() {
-    return _FindPlaceScreenContainerState();
+    return _FindPlaceScreenContainerState(_favoriteList);
   }
 }
 
@@ -155,11 +161,11 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
       PublishSubject<FavoriteItem>();
   PublishSubject<FavoriteItem> _removeFromFavoriteIntent =
       PublishSubject<FavoriteItem>();
-  FavoriteList _favoriteList;
+  final FavoriteList _favoriteList;
 
   List<String> favoriteItemId = List();
 
-  bool _hasPreloadDocuments = false;
+  _FindPlaceScreenContainerState(this._favoriteList);
 
   Future<FindPlacesParameter> _showSettingsDialog(
       BuildContext context, FindPlacesParameter parameter) {
@@ -180,11 +186,6 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
 
   @override
   Widget build(BuildContext context) {
-    _favoriteList = ModalRoute.of(context).settings.arguments;
-    if (!_hasPreloadDocuments) {
-      _preloadSavedDocuments();
-      _hasPreloadDocuments = true;
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text("Find new place"),
@@ -296,7 +297,6 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
           .doOnListen(() {
         favoriteItemId.clear();
       }).listen((snapshot) {
-        debugPrint("snapshot: $snapshot");
         if (snapshot != null) {
           snapshot.documents.forEach((data) {
             favoriteItemId.add(data.documentID);
@@ -310,6 +310,8 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
   void initState() {
     super.initState();
     _init();
+
+    _preloadSavedDocuments();
   }
 
   void _init() {
@@ -317,15 +319,15 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
       _loadData(_controller.text, pageToken: _nextPageToken);
     });
     _addToFavoriteIntent.listen((item) {
+      item.isFavorite = true;
       Observable.fromFuture(_favoriteList.snapshot.reference
               .collection(FireStoreConstants.collectionFavoriteItem)
               .document(item.placeId)
-              .setData(Map(), merge: true))
+              .setData(item.toJson(), merge: true))
           .listen((snapshot) {
         debugPrint("add done, ${item.placeId}");
 
         setState(() {
-          item.isFavorite = true;
           favoriteItemId.add(item.placeId);
         });
       });
@@ -385,99 +387,6 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
   }
 }
 
-class _FavoriteItemRow extends StatelessWidget {
-  final FavoriteItem _favoriteItem;
-  final PublishSubject<FavoriteItem> _addToFavoriteIntent;
-  final PublishSubject<FavoriteItem> _removeFromFavoriteIntent;
-
-  _FavoriteItemRow(this._favoriteItem, this._addToFavoriteIntent,
-      this._removeFromFavoriteIntent);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.maxFinite,
-      padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              children: <Widget>[
-                InkWell(
-                  onTap: () {},
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Text(
-                            _favoriteItem.displayName,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 4),
-                      ),
-                      Row(
-                        children: <Widget>[
-                          Flexible(
-                            child: Container(
-                              child: Text(
-                                (_favoriteItem.address == null
-                                    ? ""
-                                    : _favoriteItem.address),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 4),
-                      ),
-                      Row(
-                        children: <Widget>[
-                          RatingWidget(_favoriteItem.rating),
-                          PriceWidget(_favoriteItem.priceLevel),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Divider()
-              ],
-            ),
-          ),
-          Container(
-            width: 48,
-            height: 64,
-            padding: EdgeInsets.only(bottom: 16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(48),
-              onTap: () {
-                if (_favoriteItem.isFavorite) {
-                  _removeFromFavoriteIntent.add(_favoriteItem);
-                } else {
-                  _addToFavoriteIntent.add(_favoriteItem);
-                }
-              },
-              child: Icon(
-                (_favoriteItem.isFavorite ? Icons.star : Icons.star_border),
-                color: Colors.amberAccent,
-                size: 24,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _FavoriteItemList extends StatelessWidget {
   final List<FavoriteItem> _favoriteItemList;
   final PublishSubject<dynamic> _loadMoreIntent;
@@ -499,18 +408,8 @@ class _FavoriteItemList extends StatelessWidget {
     return ListView.builder(
       itemBuilder: (context, index) {
         if (index < _favoriteItemList.length) {
-          return Column(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 8),
-              ),
-              _FavoriteItemRow(_favoriteItemList[index], _addToFavoriteIntent,
-                  _removeFromFavoriteIntent),
-              Padding(
-                padding: EdgeInsets.only(top: 8),
-              ),
-            ],
-          );
+          return FavoriteItemRow(_favoriteItemList[index], _addToFavoriteIntent,
+              _removeFromFavoriteIntent);
         } else {
           if (!_isLoadingMore) {
             return FlatButton(
