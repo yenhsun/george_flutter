@@ -7,13 +7,13 @@ class FavoriteItem {
   String displayName;
   PriceLevel priceLevel;
   num rating;
-  bool isFavorite;
+  bool isFavorite = false;
   String address;
   List<Photo> photos;
 
   FavoriteItem();
 
-  factory FavoriteItem.fromPlacesSearchResult(PlacesSearchResult result) {
+  factory FavoriteItem.fromPlacesSearchResult(PlacesSearchResult result, bool isFavorite) {
     FavoriteItem item = FavoriteItem();
     item.displayName = result.name;
     item.placeId = result.placeId;
@@ -21,6 +21,7 @@ class FavoriteItem {
     item.rating = result.rating;
     item.address = result.vicinity;
     item.photos = result.photos;
+    item.isFavorite = isFavorite;
 //    debugPrint("-----${result.name}-----");
 //    result.types.forEach((data){
 //      debugPrint("type: $data");

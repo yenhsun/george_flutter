@@ -151,7 +151,15 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
   List<FavoriteItem> _favoriteItemList = List();
   String _nextPageToken;
   PublishSubject<dynamic> _loadMoreIntent = PublishSubject<dynamic>();
+  PublishSubject<FavoriteItem> _addToFavoriteIntent =
+      PublishSubject<FavoriteItem>();
+  PublishSubject<FavoriteItem> _removeFromFavoriteIntent =
+      PublishSubject<FavoriteItem>();
   FavoriteList _favoriteList;
+
+  List<String> favoriteItemId = List();
+
+  bool _hasPreloadDocuments = false;
 
   Future<FindPlacesParameter> _showSettingsDialog(
       BuildContext context, FindPlacesParameter parameter) {
@@ -166,12 +174,17 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
   void dispose() {
     super.dispose();
     _loadMoreIntent.close();
+    _addToFavoriteIntent.close();
+    _removeFromFavoriteIntent.close();
   }
 
   @override
   Widget build(BuildContext context) {
     _favoriteList = ModalRoute.of(context).settings.arguments;
-
+    if (!_hasPreloadDocuments) {
+      _preloadSavedDocuments();
+      _hasPreloadDocuments = true;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("Find new place"),
@@ -228,7 +241,9 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
                 _favoriteItemList,
                 _loadMoreIntent,
                 _nextPageToken,
-                _isLoadingMore),
+                _isLoadingMore,
+                _addToFavoriteIntent,
+                _removeFromFavoriteIntent),
           )
         ],
       ),
@@ -253,7 +268,8 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
         if (!response.hasNoResults) {
           response.results.forEach((placesResult) {
             if (placesResult.types.contains(data.placeSearchType)) {
-              result.add(FavoriteItem.fromPlacesSearchResult(placesResult));
+              result.add(FavoriteItem.fromPlacesSearchResult(
+                  placesResult, favoriteItemId.contains(placesResult.placeId)));
             }
           });
         }
@@ -272,16 +288,61 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
     });
   }
 
+  void _preloadSavedDocuments() {
+    if (_favoriteList != null) {
+      Observable.fromFuture(_favoriteList.snapshot.reference
+              .collection(FireStoreConstants.collectionFavoriteItem)
+              .getDocuments())
+          .doOnListen(() {
+        favoriteItemId.clear();
+      }).listen((snapshot) {
+        debugPrint("snapshot: $snapshot");
+        if (snapshot != null) {
+          snapshot.documents.forEach((data) {
+            favoriteItemId.add(data.documentID);
+          });
+        }
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _init();
-//    _favoriteList.snapshot.reference.collection(FireStoreConstants.collectionFavoriteItem).getDocuments()
   }
 
   void _init() {
     _loadMoreIntent.listen((any) {
       _loadData(_controller.text, pageToken: _nextPageToken);
+    });
+    _addToFavoriteIntent.listen((item) {
+      Observable.fromFuture(_favoriteList.snapshot.reference
+              .collection(FireStoreConstants.collectionFavoriteItem)
+              .document(item.placeId)
+              .setData(Map(), merge: true))
+          .listen((snapshot) {
+        debugPrint("add done, ${item.placeId}");
+
+        setState(() {
+          item.isFavorite = true;
+          favoriteItemId.add(item.placeId);
+        });
+      });
+    });
+    _removeFromFavoriteIntent.listen((item) {
+      Observable.fromFuture(_favoriteList.snapshot.reference
+              .collection(FireStoreConstants.collectionFavoriteItem)
+              .document(item.placeId)
+              .delete())
+          .listen((dynamic) {
+        debugPrint("delete done, ${item.placeId}");
+
+        setState(() {
+          item.isFavorite = false;
+          favoriteItemId.remove(item.placeId);
+        });
+      });
     });
   }
 }
@@ -292,9 +353,17 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
   final PublishSubject<dynamic> _loadMoreIntent;
   final String _nextPageToken;
   final bool _isLoadingMore;
+  final PublishSubject<FavoriteItem> _addToFavoriteIntent;
+  final PublishSubject<FavoriteItem> _removeFromFavoriteIntent;
 
-  _FindPlacesScreenContainerBranch(this._isLoading, this._favoriteItemList,
-      this._loadMoreIntent, this._nextPageToken, this._isLoadingMore);
+  _FindPlacesScreenContainerBranch(
+      this._isLoading,
+      this._favoriteItemList,
+      this._loadMoreIntent,
+      this._nextPageToken,
+      this._isLoadingMore,
+      this._addToFavoriteIntent,
+      this._removeFromFavoriteIntent);
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +371,12 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
       return CircularProgressBar(text: "Request near by data...");
     } else if (_favoriteItemList.isNotEmpty) {
       return _FavoriteItemList(
-          _favoriteItemList, _loadMoreIntent, _nextPageToken, _isLoadingMore);
+          _favoriteItemList,
+          _loadMoreIntent,
+          _nextPageToken,
+          _isLoadingMore,
+          _addToFavoriteIntent,
+          _removeFromFavoriteIntent);
     } else {
       return Center(
         child: Text("Empty result"),
@@ -313,8 +387,11 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
 
 class _FavoriteItemRow extends StatelessWidget {
   final FavoriteItem _favoriteItem;
+  final PublishSubject<FavoriteItem> _addToFavoriteIntent;
+  final PublishSubject<FavoriteItem> _removeFromFavoriteIntent;
 
-  _FavoriteItemRow(this._favoriteItem);
+  _FavoriteItemRow(this._favoriteItem, this._addToFavoriteIntent,
+      this._removeFromFavoriteIntent);
 
   @override
   Widget build(BuildContext context) {
@@ -381,9 +458,15 @@ class _FavoriteItemRow extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 16),
             child: InkWell(
               borderRadius: BorderRadius.circular(48),
-              onTap: () {},
+              onTap: () {
+                if (_favoriteItem.isFavorite) {
+                  _removeFromFavoriteIntent.add(_favoriteItem);
+                } else {
+                  _addToFavoriteIntent.add(_favoriteItem);
+                }
+              },
               child: Icon(
-                Icons.star_border,
+                (_favoriteItem.isFavorite ? Icons.star : Icons.star_border),
                 color: Colors.amberAccent,
                 size: 24,
               ),
@@ -400,9 +483,16 @@ class _FavoriteItemList extends StatelessWidget {
   final PublishSubject<dynamic> _loadMoreIntent;
   final String _nextPageToken;
   final bool _isLoadingMore;
+  final PublishSubject<FavoriteItem> _addToFavoriteIntent;
+  final PublishSubject<FavoriteItem> _removeFromFavoriteIntent;
 
-  _FavoriteItemList(this._favoriteItemList, this._loadMoreIntent,
-      this._nextPageToken, this._isLoadingMore);
+  _FavoriteItemList(
+      this._favoriteItemList,
+      this._loadMoreIntent,
+      this._nextPageToken,
+      this._isLoadingMore,
+      this._addToFavoriteIntent,
+      this._removeFromFavoriteIntent);
 
   @override
   Widget build(BuildContext context) {
@@ -414,7 +504,8 @@ class _FavoriteItemList extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(top: 8),
               ),
-              _FavoriteItemRow(_favoriteItemList[index]),
+              _FavoriteItemRow(_favoriteItemList[index], _addToFavoriteIntent,
+                  _removeFromFavoriteIntent),
               Padding(
                 padding: EdgeInsets.only(top: 8),
               ),
