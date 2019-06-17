@@ -60,7 +60,7 @@ class _UpdatableDialogState extends State<_UpdatableDialog> {
             children: <Widget>[
               Text("Distance"),
               Container(
-                width: 100,
+                width: 110,
                 child: DropdownButton(
                   items: <String>[
                     '500',
@@ -94,7 +94,7 @@ class _UpdatableDialogState extends State<_UpdatableDialog> {
             children: <Widget>[
               Text("Search type"),
               Container(
-                width: 100,
+                width: 110,
                 child: DropdownButton(
                   items: <String>[
                     FindPlacesParameter.TYPE_RESTAURANT,
