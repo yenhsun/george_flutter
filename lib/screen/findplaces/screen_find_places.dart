@@ -11,6 +11,7 @@ import 'package:george_flutter/util/map_helper.dart';
 import 'package:george_flutter/util/shared_preference_helper.dart'
     as SharedPreferenceHelper;
 import 'package:george_flutter/util/view/loading.dart';
+import 'package:google_maps_webservice/places.dart';
 import 'package:toast/toast.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
@@ -94,6 +95,7 @@ class _UpdatableDialogState extends State<_UpdatableDialog> {
                 width: 100,
                 child: DropdownButton(
                   items: <String>[
+                    FindPlacesParameter.TYPE_RESTAURANT,
                     FindPlacesParameter.TYPE_FOOD,
                     FindPlacesParameter.TYPE_STORE,
                     FindPlacesParameter.TYPE_DELIVERY,
@@ -246,8 +248,11 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
       data.search(keyword: keyword, pageToken: pageToken).map((response) {
         var result = List<FavoriteItem>();
         if (!response.hasNoResults) {
-          response.results.forEach((placesResult) =>
-              result.add(FavoriteItem.fromPlacesSearchResult(placesResult)));
+          response.results.forEach((placesResult) {
+            if (placesResult.types.contains(data.placeSearchType)) {
+              result.add(FavoriteItem.fromPlacesSearchResult(placesResult));
+            }
+          });
         }
         debugPrint("response.isInvalid: ${response.isInvalid}");
         if (!response.isInvalid) {
@@ -298,6 +303,223 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
   }
 }
 
+class _PriceWidget extends StatelessWidget {
+  final PriceLevel _priceLevel;
+
+  _PriceWidget(this._priceLevel);
+
+  @override
+  Widget build(BuildContext context) {
+    final widgetList = List<Widget>();
+    int count = 0;
+    if (_priceLevel == PriceLevel.free) {
+      count = 1;
+    } else if (_priceLevel == PriceLevel.inexpensive) {
+      count = 2;
+    } else if (_priceLevel == PriceLevel.moderate) {
+      count = 3;
+    } else if (_priceLevel == PriceLevel.expensive) {
+      count = 4;
+    } else if (_priceLevel == PriceLevel.veryExpensive) {
+      count = 5;
+    }
+    widgetList.add(Padding(padding: EdgeInsets.only(left: 20)));
+
+    final double size = 12;
+    for (int i = 0; i < count; ++i) {
+      widgetList.add(Icon(
+        Icons.attach_money,
+        color: Colors.green,
+        size: size,
+      ));
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: widgetList,
+    );
+  }
+}
+
+class _RatingWidget extends StatelessWidget {
+  final num _rating;
+
+  _RatingWidget(this._rating);
+
+  @override
+  Widget build(BuildContext context) {
+    var starData = List<IconData>();
+    if (_rating <= 0) {
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+    } else if (_rating < 1) {
+      starData.add(Icons.star_half);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+    } else if (_rating == 1) {
+      starData.add(Icons.star);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+    } else if (_rating < 2) {
+      starData.add(Icons.star);
+      starData.add(Icons.star_half);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+    } else if (_rating == 2) {
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+    } else if (_rating < 3) {
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star_half);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+    } else if (_rating == 3) {
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star_border);
+      starData.add(Icons.star_border);
+    } else if (_rating < 4) {
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star_half);
+      starData.add(Icons.star_border);
+    } else if (_rating == 4) {
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star_border);
+    } else if (_rating < 5) {
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star_half);
+    } else if (_rating == 5) {
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+      starData.add(Icons.star);
+    }
+    final double size = 12;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(
+          starData[0],
+          color: Colors.orangeAccent,
+          size: size,
+        ),
+        Icon(
+          starData[1],
+          color: Colors.orangeAccent,
+          size: size,
+        ),
+        Icon(
+          starData[2],
+          color: Colors.orangeAccent,
+          size: size,
+        ),
+        Icon(
+          starData[3],
+          color: Colors.orangeAccent,
+          size: size,
+        ),
+        Icon(
+          starData[4],
+          color: Colors.orangeAccent,
+          size: size,
+        ),
+      ],
+    );
+  }
+}
+
+class _FavoriteItemRow extends StatelessWidget {
+  final FavoriteItem _favoriteItem;
+
+  _FavoriteItemRow(this._favoriteItem);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.maxFinite,
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                InkWell(
+                  onTap: () {},
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            _favoriteItem.displayName,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 4),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Container(
+                              child: Text(
+                                (_favoriteItem.address == null
+                                    ? ""
+                                    : _favoriteItem.address),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 4),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          _RatingWidget(_favoriteItem.rating),
+                          _PriceWidget(_favoriteItem.priceLevel),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Divider()
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _FavoriteItemList extends StatelessWidget {
   final List<FavoriteItem> _favoriteItemList;
   final PublishSubject<dynamic> _loadMoreIntent;
@@ -317,13 +539,7 @@ class _FavoriteItemList extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(top: 8),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(_favoriteItemList[index].displayName),
-                ],
-              ),
+              _FavoriteItemRow(_favoriteItemList[index]),
               Padding(
                 padding: EdgeInsets.only(top: 8),
               ),

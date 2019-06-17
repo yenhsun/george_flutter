@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:google_maps_webservice/places.dart';
 
 class FavoriteItem {
@@ -18,8 +19,12 @@ class FavoriteItem {
     item.placeId = result.placeId;
     item.priceLevel = result.priceLevel;
     item.rating = result.rating;
-    item.address = result.formattedAddress;
+    item.address = result.vicinity;
     item.photos = result.photos;
+//    debugPrint("-----${result.name}-----");
+//    result.types.forEach((data){
+//      debugPrint("type: $data");
+//    });
     return item;
   }
 }

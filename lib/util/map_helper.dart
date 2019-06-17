@@ -36,6 +36,7 @@ Observable<PlacesSearchResponse> findNearBy(LatLng center,
 }
 
 class FindPlacesParameter {
+  static const String TYPE_RESTAURANT = "Restaurant";
   static const String TYPE_FOOD = "Food";
   static const String TYPE_STORE = "Store";
   static const String TYPE_DELIVERY = "Delivery";
@@ -46,6 +47,7 @@ class FindPlacesParameter {
 
   String distance;
   String type;
+  String placeSearchType;
 
   FindPlacesParameter(this.distance, this.type);
 
@@ -64,21 +66,22 @@ class FindPlacesParameter {
       {String pageToken, String keyword, String language = "zh-tw"}) {
     var radius = distance == DISTANCE_NONE ? 5000 : int.parse(distance);
     return getUserLocation().flatMap((latLng) {
-      var type;
-      if (this.type == TYPE_FOOD) {
-        type = "food";
-      } else if (this.type == TYPE_DELIVERY) {
-        type = "meal_delivery";
-      } else if (this.type == TYPE_TAKE_AWAY) {
-        type = "meal_takeaway";
-      } else if (this.type == TYPE_STORE) {
-        type = "store";
-      } else if (this.type == TYPE_CAFE) {
-        type = "cafe";
+      if (type == TYPE_FOOD) {
+        placeSearchType = "food";
+      } else if (type == TYPE_RESTAURANT) {
+        placeSearchType = "restaurant";
+      } else if (type == TYPE_DELIVERY) {
+        placeSearchType = "meal_delivery";
+      } else if (type == TYPE_TAKE_AWAY) {
+        placeSearchType = "meal_takeaway";
+      } else if (type == TYPE_STORE) {
+        placeSearchType = "store";
+      } else if (type == TYPE_CAFE) {
+        placeSearchType = "cafe";
       }
       return findNearBy(latLng,
           radius: radius,
-          type: type,
+          type: placeSearchType,
           pageToken: pageToken,
           language: language,
           keyword: keyword);
@@ -91,7 +94,7 @@ Observable<FindPlacesParameter> getSavedFindPlacesParameter() {
       SharedPreferenceHelper.getString(
           SharedPreferenceHelper.Constants.keyFindPlaceDistance, "1000"),
       SharedPreferenceHelper.getString(
-          SharedPreferenceHelper.Constants.keyFindPlaceType, "Food"),
+          SharedPreferenceHelper.Constants.keyFindPlaceType, FindPlacesParameter.TYPE_RESTAURANT),
       (distance, type) {
     return FindPlacesParameter(distance, type);
   });
