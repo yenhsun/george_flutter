@@ -125,6 +125,8 @@ class FireStoreConstants {
   static final String favoriteListName = "name";
   static final String favoriteListCreateTime = "create_time";
   static final String favoriteListCreateBy = "create_by";
+
+  static final String collectionFavoriteItem = "item_favorite";
 }
 
 class AuthData {

@@ -11,6 +11,8 @@ import 'package:george_flutter/util/map_helper.dart';
 import 'package:george_flutter/util/shared_preference_helper.dart'
     as SharedPreferenceHelper;
 import 'package:george_flutter/util/view/loading.dart';
+import 'package:george_flutter/util/view/price.dart';
+import 'package:george_flutter/util/view/rating.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:toast/toast.dart';
 import 'package:rxdart/rxdart.dart';
@@ -149,6 +151,7 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
   List<FavoriteItem> _favoriteItemList = List();
   String _nextPageToken;
   PublishSubject<dynamic> _loadMoreIntent = PublishSubject<dynamic>();
+  FavoriteList _favoriteList;
 
   Future<FindPlacesParameter> _showSettingsDialog(
       BuildContext context, FindPlacesParameter parameter) {
@@ -167,7 +170,7 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final FavoriteList favoriteList = ModalRoute.of(context).settings.arguments;
+    _favoriteList = ModalRoute.of(context).settings.arguments;
 
     return Scaffold(
       appBar: AppBar(
@@ -203,7 +206,7 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
                 contentPadding: EdgeInsets.only(left: 16.0, top: 12),
                 alignLabelWithHint: true,
                 prefixText:
-                    "${favoriteList.snapshot.data[FireStoreConstants.favoriteListName]}: ",
+                    "${_favoriteList.snapshot.data[FireStoreConstants.favoriteListName]}: ",
                 suffixIcon: IconButton(
                   padding: EdgeInsets.all(0),
                   icon: Icon(
@@ -272,6 +275,11 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
   @override
   void initState() {
     super.initState();
+    _init();
+//    _favoriteList.snapshot.reference.collection(FireStoreConstants.collectionFavoriteItem).getDocuments()
+  }
+
+  void _init() {
     _loadMoreIntent.listen((any) {
       _loadData(_controller.text, pageToken: _nextPageToken);
     });
@@ -303,154 +311,6 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
   }
 }
 
-class _PriceWidget extends StatelessWidget {
-  final PriceLevel _priceLevel;
-
-  _PriceWidget(this._priceLevel);
-
-  @override
-  Widget build(BuildContext context) {
-    final widgetList = List<Widget>();
-    int count = 0;
-    if (_priceLevel == PriceLevel.free) {
-      count = 1;
-    } else if (_priceLevel == PriceLevel.inexpensive) {
-      count = 2;
-    } else if (_priceLevel == PriceLevel.moderate) {
-      count = 3;
-    } else if (_priceLevel == PriceLevel.expensive) {
-      count = 4;
-    } else if (_priceLevel == PriceLevel.veryExpensive) {
-      count = 5;
-    }
-    widgetList.add(Padding(padding: EdgeInsets.only(left: 20)));
-
-    final double size = 12;
-    for (int i = 0; i < count; ++i) {
-      widgetList.add(Icon(
-        Icons.attach_money,
-        color: Colors.green,
-        size: size,
-      ));
-    }
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: widgetList,
-    );
-  }
-}
-
-class _RatingWidget extends StatelessWidget {
-  final num _rating;
-
-  _RatingWidget(this._rating);
-
-  @override
-  Widget build(BuildContext context) {
-    var starData = List<IconData>();
-    if (_rating <= 0) {
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-    } else if (_rating < 1) {
-      starData.add(Icons.star_half);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-    } else if (_rating == 1) {
-      starData.add(Icons.star);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-    } else if (_rating < 2) {
-      starData.add(Icons.star);
-      starData.add(Icons.star_half);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-    } else if (_rating == 2) {
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-    } else if (_rating < 3) {
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star_half);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-    } else if (_rating == 3) {
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star_border);
-      starData.add(Icons.star_border);
-    } else if (_rating < 4) {
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star_half);
-      starData.add(Icons.star_border);
-    } else if (_rating == 4) {
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star_border);
-    } else if (_rating < 5) {
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star_half);
-    } else if (_rating == 5) {
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-      starData.add(Icons.star);
-    }
-    final double size = 12;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Icon(
-          starData[0],
-          color: Colors.orangeAccent,
-          size: size,
-        ),
-        Icon(
-          starData[1],
-          color: Colors.orangeAccent,
-          size: size,
-        ),
-        Icon(
-          starData[2],
-          color: Colors.orangeAccent,
-          size: size,
-        ),
-        Icon(
-          starData[3],
-          color: Colors.orangeAccent,
-          size: size,
-        ),
-        Icon(
-          starData[4],
-          color: Colors.orangeAccent,
-          size: size,
-        ),
-      ],
-    );
-  }
-}
-
 class _FavoriteItemRow extends StatelessWidget {
   final FavoriteItem _favoriteItem;
 
@@ -463,6 +323,7 @@ class _FavoriteItemRow extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Expanded(
             child: Column(
@@ -503,8 +364,8 @@ class _FavoriteItemRow extends StatelessWidget {
                       ),
                       Row(
                         children: <Widget>[
-                          _RatingWidget(_favoriteItem.rating),
-                          _PriceWidget(_favoriteItem.priceLevel),
+                          RatingWidget(_favoriteItem.rating),
+                          PriceWidget(_favoriteItem.priceLevel),
                         ],
                       ),
                     ],
@@ -512,6 +373,20 @@ class _FavoriteItemRow extends StatelessWidget {
                 ),
                 Divider()
               ],
+            ),
+          ),
+          Container(
+            width: 48,
+            height: 64,
+            padding: EdgeInsets.only(bottom: 16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(48),
+              onTap: () {},
+              child: Icon(
+                Icons.star_border,
+                color: Colors.amberAccent,
+                size: 24,
+              ),
             ),
           ),
         ],
