@@ -9,6 +9,32 @@ part 'model_favorite.g.dart';
 // flutter pub run build_runner build --delete-conflicting-outputs
 
 @JsonSerializable()
+class OpeningHours {
+  List<OpeningHoursPeriod> periods = List();
+
+  OpeningHours();
+
+  factory OpeningHours.fromJson(Map<String, dynamic> json) =>
+      _$OpeningHoursFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OpeningHoursToJson(this);
+}
+
+@JsonSerializable()
+class OpeningHoursPeriod {
+  String open;
+  String close;
+  int day;
+
+  OpeningHoursPeriod(this.open, this.close, this.day);
+
+  factory OpeningHoursPeriod.fromJson(Map<String, dynamic> json) =>
+      _$OpeningHoursPeriodFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OpeningHoursPeriodToJson(this);
+}
+
+@JsonSerializable()
 class FavoriteItem {
   String addedUserId;
   String placeId;
@@ -24,7 +50,35 @@ class FavoriteItem {
   bool permanentlyClosed;
   String scope;
 
+  String formattedPhoneNumber;
+  String internationalPhoneNumber;
+  String website;
+  String url;
+
+  OpeningHours openingHours;
+
+  List<String> types = List();
+
+  @JsonKey(ignore: true)
+  List<Review> reviews;
+
   FavoriteItem();
+
+  void apply(PlaceDetails details) {
+    this.types.clear();
+    this.types.addAll(details.types);
+    this.formattedPhoneNumber = details.formattedPhoneNumber;
+    this.internationalPhoneNumber = details.internationalPhoneNumber;
+    this.website = details.website;
+    this.url = details.url;
+
+    this.openingHours = OpeningHours();
+    details.openingHours.periods.forEach((period) {
+      this.openingHours.periods.add(OpeningHoursPeriod(
+          period.open.time, period.close.time, period.open.day));
+    });
+    this.reviews = details.reviews;
+  }
 
   factory FavoriteItem.fromPlacesSearchResult(
       PlacesSearchResult result, bool isFavorite) {

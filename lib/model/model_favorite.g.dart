@@ -6,6 +6,30 @@ part of 'model_favorite.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+OpeningHours _$OpeningHoursFromJson(Map<String, dynamic> json) {
+  return OpeningHours()
+    ..periods = (json['periods'] as List)
+        ?.map((e) => e == null
+            ? null
+            : OpeningHoursPeriod.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$OpeningHoursToJson(OpeningHours instance) =>
+    <String, dynamic>{'periods': instance.periods};
+
+OpeningHoursPeriod _$OpeningHoursPeriodFromJson(Map<String, dynamic> json) {
+  return OpeningHoursPeriod(
+      json['open'] as String, json['close'] as String, json['day'] as int);
+}
+
+Map<String, dynamic> _$OpeningHoursPeriodToJson(OpeningHoursPeriod instance) =>
+    <String, dynamic>{
+      'open': instance.open,
+      'close': instance.close,
+      'day': instance.day
+    };
+
 FavoriteItem _$FavoriteItemFromJson(Map<String, dynamic> json) {
   return FavoriteItem()
     ..addedUserId = json['addedUserId'] as String
@@ -19,7 +43,15 @@ FavoriteItem _$FavoriteItemFromJson(Map<String, dynamic> json) {
     ..lat = (json['lat'] as num)?.toDouble()
     ..lng = (json['lng'] as num)?.toDouble()
     ..permanentlyClosed = json['permanentlyClosed'] as bool
-    ..scope = json['scope'] as String;
+    ..scope = json['scope'] as String
+    ..formattedPhoneNumber = json['formattedPhoneNumber'] as String
+    ..internationalPhoneNumber = json['internationalPhoneNumber'] as String
+    ..website = json['website'] as String
+    ..url = json['url'] as String
+    ..openingHours = json['openingHours'] == null
+        ? null
+        : OpeningHours.fromJson(json['openingHours'] as Map<String, dynamic>)
+    ..types = (json['types'] as List)?.map((e) => e as String)?.toList();
 }
 
 Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
@@ -35,7 +67,13 @@ Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
       'lat': instance.lat,
       'lng': instance.lng,
       'permanentlyClosed': instance.permanentlyClosed,
-      'scope': instance.scope
+      'scope': instance.scope,
+      'formattedPhoneNumber': instance.formattedPhoneNumber,
+      'internationalPhoneNumber': instance.internationalPhoneNumber,
+      'website': instance.website,
+      'url': instance.url,
+      'openingHours': instance.openingHours,
+      'types': instance.types
     };
 
 T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {

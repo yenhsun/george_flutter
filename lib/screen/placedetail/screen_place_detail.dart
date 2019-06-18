@@ -11,7 +11,7 @@ import 'package:george_flutter/util/firebase_helper.dart';
 import 'package:george_flutter/util/map_helper.dart' as MapHelper;
 import 'package:george_flutter/util/map_helper.dart';
 import 'package:george_flutter/util/shared_preference_helper.dart'
-as SharedPreferenceHelper;
+    as SharedPreferenceHelper;
 import 'package:george_flutter/util/view/loading.dart';
 import 'package:george_flutter/util/view/price.dart';
 import 'package:george_flutter/util/view/rating.dart';
@@ -22,11 +22,80 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-class PlaceDetailScreen extends StatelessWidget{
+class PlaceDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FavoriteItem item = ModalRoute.of(context).settings.arguments;
-    return Text("PlaceDetailScreen ${item.displayName}");
+    return _PlaceDetailScreenContainer(item);
+  }
+}
+
+class _PlaceDetailScreenContainer extends StatefulWidget {
+  final FavoriteItem _favoriteItem;
+
+  _PlaceDetailScreenContainer(this._favoriteItem);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _PlaceDetailScreenState(_favoriteItem);
+  }
+}
+
+class _PlaceDetailScreenState extends State<_PlaceDetailScreenContainer> {
+  final FavoriteItem _favoriteItem;
+  bool _isLoading = false;
+
+  _PlaceDetailScreenState(this._favoriteItem);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("${_favoriteItem.displayName}"),
+      ),
+      body: _PlaceDetailBody(_isLoading, _favoriteItem),
+    );
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    MapHelper.getPlaceDetail(_favoriteItem.placeId).doOnListen(() {
+      setState(() {
+        _isLoading = true;
+      });
+    }).listen((detailResponse) {
+      _favoriteItem.apply(detailResponse.result);
+    }, onDone: () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+}
+
+class _PlaceDetailBody extends StatelessWidget {
+  final FavoriteItem _favoriteItem;
+  final bool _isLoading;
+
+  _PlaceDetailBody(this._isLoading, this._favoriteItem);
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressBar(
+          text: "Loading ${_favoriteItem.displayName} information...",
+        ),
+      );
+    } else {
+      return Text("done");
+    }
+  }
 }
