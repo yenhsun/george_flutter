@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,7 +6,7 @@ import 'package:fimber/fimber.dart';
 import 'package:flutter/material.dart';
 import 'package:george_flutter/model/model_favorite.dart';
 import 'package:george_flutter/screen/sign_in/util/auth.dart';
-import 'package:george_flutter/util/favorite_item_row.dart';
+import 'package:george_flutter/util/view/favorite_item_row.dart';
 import 'package:george_flutter/util/firebase_helper.dart';
 import 'package:george_flutter/util/map_helper.dart' as MapHelper;
 import 'package:george_flutter/util/map_helper.dart';
@@ -163,6 +164,8 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
       PublishSubject<FavoriteItem>();
   final FavoriteList _favoriteList;
 
+  StreamSubscription _loadingDataDisposable;
+
   List<String> favoriteItemId = List();
 
   _FindPlaceScreenContainerState(this._favoriteList);
@@ -252,7 +255,12 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
   }
 
   void _loadData(String keyword, {String pageToken}) {
-    MapHelper.getSavedFindPlacesParameter().doOnListen(() {
+    if (_loadingDataDisposable != null) {
+      _loadingDataDisposable.cancel();
+      _loadingDataDisposable = null;
+    }
+    _loadingDataDisposable =
+        MapHelper.getSavedFindPlacesParameter().doOnListen(() {
       setState(() {
         if (pageToken == null) {
           _favoriteItemList.clear();
@@ -264,7 +272,11 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
         }
       });
     }).listen((data) {
-      data.search(keyword: keyword, pageToken: pageToken).map((response) {
+      data.search(keyword: keyword, pageToken: pageToken).doOnData((response) {
+        if (!response.isInvalid) {
+          _nextPageToken = response.nextPageToken;
+        }
+      }).map((response) {
         var result = List<FavoriteItem>();
         if (!response.hasNoResults) {
           response.results.forEach((placesResult) {
@@ -273,10 +285,6 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
                   placesResult, favoriteItemId.contains(placesResult.placeId)));
             }
           });
-        }
-        debugPrint("response.isInvalid: ${response.isInvalid}");
-        if (!response.isInvalid) {
-          _nextPageToken = response.nextPageToken;
         }
         return result;
       }).listen((data) {

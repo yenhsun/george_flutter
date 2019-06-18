@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:george_flutter/model/model_favorite.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter/material.dart';
@@ -94,8 +95,14 @@ Observable<FindPlacesParameter> getSavedFindPlacesParameter() {
       SharedPreferenceHelper.getString(
           SharedPreferenceHelper.Constants.keyFindPlaceDistance, "1000"),
       SharedPreferenceHelper.getString(
-          SharedPreferenceHelper.Constants.keyFindPlaceType, FindPlacesParameter.TYPE_RESTAURANT),
-      (distance, type) {
+          SharedPreferenceHelper.Constants.keyFindPlaceType,
+          FindPlacesParameter.TYPE_RESTAURANT), (distance, type) {
     return FindPlacesParameter(distance, type);
   });
+}
+
+Observable<PlacesDetailsResponse> getPlaceDetail(String placeId,
+    {String language = "zh-tw"}) {
+  return Observable.fromFuture(
+      _places.getDetailsByPlaceId(placeId, language: language));
 }

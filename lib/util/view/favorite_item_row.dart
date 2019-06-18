@@ -3,6 +3,7 @@ import 'package:george_flutter/model/model_favorite.dart';
 import 'package:george_flutter/util/view/price.dart';
 import 'package:george_flutter/util/view/rating.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class FavoriteItemRow extends StatelessWidget {
   final FavoriteItem _favoriteItem;
@@ -36,26 +37,15 @@ class FavoriteItemRow extends StatelessWidget {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              Text(
-                                _favoriteItem.displayName,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 4),
-                          ),
-                          Row(
-                            children: <Widget>[
-                              Flexible(
-                                child: Container(
-                                  child: Text(
-                                    (_favoriteItem.address == null
-                                        ? ""
-                                        : _favoriteItem.address),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
+                              Container(
+                                width: 300,
+                                child: Text(
+                                  _favoriteItem.displayName,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 18,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -65,8 +55,27 @@ class FavoriteItemRow extends StatelessWidget {
                           ),
                           Row(
                             children: <Widget>[
+                              Text(
+                                  "${_favoriteItem.rating.toDouble().toString()}  "),
                               RatingWidget(_favoriteItem.rating),
                               PriceWidget(_favoriteItem.priceLevel),
+                            ],
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 4),
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Container(
+                                width: 300,
+                                child: Text(
+                                  (_favoriteItem.address == null
+                                      ? ""
+                                      : _favoriteItem.address),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
                             ],
                           ),
                         ],

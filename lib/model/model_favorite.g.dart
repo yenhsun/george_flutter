@@ -14,7 +14,8 @@ FavoriteItem _$FavoriteItemFromJson(Map<String, dynamic> json) {
     ..priceLevel = _$enumDecodeNullable(_$PriceLevelEnumMap, json['priceLevel'])
     ..rating = json['rating'] as num
     ..isFavorite = json['isFavorite'] as bool
-    ..address = json['address'] as String;
+    ..address = json['address'] as String
+    ..photos = (json['photos'] as List)?.map((e) => e as String)?.toList();
 }
 
 Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
@@ -25,7 +26,8 @@ Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
       'priceLevel': _$PriceLevelEnumMap[instance.priceLevel],
       'rating': instance.rating,
       'isFavorite': instance.isFavorite,
-      'address': instance.address
+      'address': instance.address,
+      'photos': instance.photos
     };
 
 T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {

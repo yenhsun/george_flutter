@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../main.dart';
+
 part 'model_favorite.g.dart';
 
-// flutter pub run build_runner build
+// flutter pub run build_runner build --delete-conflicting-outputs
 
 @JsonSerializable()
 class FavoriteItem {
@@ -15,6 +17,7 @@ class FavoriteItem {
   num rating;
   bool isFavorite = false;
   String address;
+  List<String> photos = List<String>();
 
   FavoriteItem();
 
@@ -26,6 +29,12 @@ class FavoriteItem {
     item.priceLevel = result.priceLevel;
     item.rating = result.rating;
     item.address = result.vicinity;
+    if (result.photos != null) {
+      result.photos.forEach((photo) {
+        item.photos.add("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photoReference}&key=$kGoogleApiKey");
+      });
+    }
+
     item.isFavorite = isFavorite;
 //    debugPrint("-----${result.name}-----");
 //    result.types.forEach((data){
