@@ -89,7 +89,10 @@ class FirebaseUser {
     map[FireStoreConstants.favoriteListName] = name;
     map[FireStoreConstants.favoriteListCreateTime] =
         DateTime.now().millisecondsSinceEpoch.toString();
-    map[FireStoreConstants.favoriteListCreateBy] = _authData.googleSignInAccount.displayName;
+    map[FireStoreConstants.favoriteListCreateByName] =
+        _authData.googleSignInAccount.displayName;
+    map[FireStoreConstants.favoriteListCreateById] =
+        _authData.googleSignInAccount.id;
 
     final documentReference = Firestore.instance
         .collection(FireStoreConstants.collectionFavoriteList)
@@ -124,7 +127,8 @@ class FireStoreConstants {
   static final String collectionFavoriteList = "list_favorite";
   static final String favoriteListName = "name";
   static final String favoriteListCreateTime = "create_time";
-  static final String favoriteListCreateBy = "create_by";
+  static final String favoriteListCreateByName = "create_by_name";
+  static final String favoriteListCreateById = "create_by_id";
 
   static final String collectionFavoriteItem = "item_favorite";
 }
