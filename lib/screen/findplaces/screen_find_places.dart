@@ -342,9 +342,9 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
     });
     _removeFromFavoriteIntent.listen((item) {
       Observable.fromFuture(_favoriteList.snapshot.reference
-              .collection(FireStoreConstants.collectionFavoriteItem)
-              .document(item.placeId)
-              .delete())
+          .collection(FireStoreConstants.collectionFavoriteItem)
+          .document(item.placeId)
+          .delete())
           .listen((dynamic) {
         debugPrint("delete done, ${item.placeId}");
 

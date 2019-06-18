@@ -4,4 +4,5 @@ class ScreenPath {
   static const favorite_list_screen = '/favorite_list';
   static const favorite_item_screen = '/favorite_list/favorite_item';
   static const find_place_screen = '/find_place';
+  static const place_detail_screen = '/place_detail';
 }
