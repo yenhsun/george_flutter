@@ -15,7 +15,11 @@ FavoriteItem _$FavoriteItemFromJson(Map<String, dynamic> json) {
     ..rating = json['rating'] as num
     ..isFavorite = json['isFavorite'] as bool
     ..address = json['address'] as String
-    ..photos = (json['photos'] as List)?.map((e) => e as String)?.toList();
+    ..photos = (json['photos'] as List)?.map((e) => e as String)?.toList()
+    ..lat = (json['lat'] as num)?.toDouble()
+    ..lng = (json['lng'] as num)?.toDouble()
+    ..permanentlyClosed = json['permanentlyClosed'] as bool
+    ..scope = json['scope'] as String;
 }
 
 Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
@@ -27,7 +31,11 @@ Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
       'rating': instance.rating,
       'isFavorite': instance.isFavorite,
       'address': instance.address,
-      'photos': instance.photos
+      'photos': instance.photos,
+      'lat': instance.lat,
+      'lng': instance.lng,
+      'permanentlyClosed': instance.permanentlyClosed,
+      'scope': instance.scope
     };
 
 T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {

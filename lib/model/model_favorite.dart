@@ -19,6 +19,11 @@ class FavoriteItem {
   String address;
   List<String> photos = List<String>();
 
+  double lat;
+  double lng;
+  bool permanentlyClosed;
+  String scope;
+
   FavoriteItem();
 
   factory FavoriteItem.fromPlacesSearchResult(
@@ -29,20 +34,24 @@ class FavoriteItem {
     item.priceLevel = result.priceLevel;
     item.rating = result.rating;
     item.address = result.vicinity;
+    item.lat = result.geometry.location.lat;
+    item.lng = result.geometry.location.lng;
+    item.permanentlyClosed = result.permanentlyClosed;
+    item.scope = result.scope;
+
     if (result.photos != null) {
       result.photos.forEach((photo) {
-        item.photos.add("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photoReference}&key=$kGoogleApiKey");
+        item.photos.add(
+            "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photoReference}&key=$kGoogleApiKey");
       });
     }
 
     item.isFavorite = isFavorite;
-//    debugPrint("-----${result.name}-----");
-//    result.types.forEach((data){
-//      debugPrint("type: $data");
-//    });
     return item;
   }
 
-  factory FavoriteItem.fromJson(Map<String, dynamic> json) => _$FavoriteItemFromJson(json);
+  factory FavoriteItem.fromJson(Map<String, dynamic> json) =>
+      _$FavoriteItemFromJson(json);
+
   Map<String, dynamic> toJson() => _$FavoriteItemToJson(this);
 }
