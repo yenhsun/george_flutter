@@ -62,16 +62,16 @@ class HomeState extends State<Home> {
         ),
         body: Column(
           children: <Widget>[
-            Container(
-              child: SizedBox(
-                  height: 200.0,
-                  child: GoogleMap(
-                      onMapCreated: _onMapCreated,
-                      options: GoogleMapOptions(
-                          myLocationEnabled: true,
-                          cameraPosition:
-                          const CameraPosition(target: LatLng(0.0, 0.0))))),
-            ),
+//            Container(
+//              child: SizedBox(
+//                  height: 200.0,
+//                  child: GoogleMap(
+//                      onMapCreated: _onMapCreated,
+//                      options: GoogleMapOptions(
+//                          myLocationEnabled: true,
+//                          cameraPosition:
+//                          const CameraPosition(target: LatLng(0.0, 0.0))))),
+//            ),
             Expanded(child: expandedChild)
           ],
         ));
@@ -118,11 +118,11 @@ class HomeState extends State<Home> {
       if (result.status == "OK") {
         this.places = result.results;
         result.results.forEach((f) {
-          final markerOptions = MarkerOptions(
-              position:
-              LatLng(f.geometry.location.lat, f.geometry.location.lng),
-              infoWindowText: InfoWindowText("${f.name}", "${f.types?.first}"));
-          mapController.addMarker(markerOptions);
+//          final markerOptions = MarkerOptions(
+//              position:
+//              LatLng(f.geometry.location.lat, f.geometry.location.lng),
+//              infoWindowText: InfoWindowText("${f.name}", "${f.types?.first}"));
+//          mapController.addMarker(markerOptions);
         });
       } else {
         this.errorMessage = result.errorMessage;

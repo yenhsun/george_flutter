@@ -42,8 +42,7 @@ class FavoriteItemRow extends StatelessWidget {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              Container(
-                                width: 300,
+                              Flexible(
                                 child: Text(
                                   _favoriteItem.displayName,
                                   style: TextStyle(
@@ -61,8 +60,8 @@ class FavoriteItemRow extends StatelessWidget {
                           Row(
                             children: <Widget>[
                               Text(
-                                  "${_favoriteItem.rating.toDouble().toString()}  "),
-                              RatingWidget(_favoriteItem.rating),
+                                  "${_favoriteItem.rating == null ? "0.0" : _favoriteItem.rating.toDouble().toString()}  "),
+                              RatingWidget(_favoriteItem.rating == null ? 0 : _favoriteItem.rating),
                               PriceWidget(_favoriteItem.priceLevel),
                             ],
                           ),
@@ -71,8 +70,7 @@ class FavoriteItemRow extends StatelessWidget {
                           ),
                           Row(
                             children: <Widget>[
-                              Container(
-                                width: 300,
+                              Flexible(
                                 child: Text(
                                   (_favoriteItem.address == null
                                       ? ""

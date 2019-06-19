@@ -65,7 +65,11 @@ class FavoriteItem {
   FavoriteItem();
 
   void apply(PlaceDetails details) {
-    this.types.clear();
+    if (this.types == null) {
+      this.types = List();
+    } else {
+      this.types.clear();
+    }
     this.types.addAll(details.types);
     this.formattedPhoneNumber = details.formattedPhoneNumber;
     this.internationalPhoneNumber = details.internationalPhoneNumber;
@@ -78,6 +82,14 @@ class FavoriteItem {
           period.open.time, period.close.time, period.open.day));
     });
     this.reviews = details.reviews;
+
+    if (details.photos != null) {
+      photos.clear();
+      details.photos.forEach((photo) {
+        photos.add(
+            "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photoReference}&key=$kGoogleApiKey");
+      });
+    }
   }
 
   factory FavoriteItem.fromPlacesSearchResult(
