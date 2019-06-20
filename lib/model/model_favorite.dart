@@ -86,6 +86,8 @@ class FavoriteItem {
     });
     this.openNow = details.openingHours.openNow;
     this.reviews = details.reviews;
+    this.lat = details.geometry.location.lat;
+    this.lng = details.geometry.location.lng;
 
     if (details.photos != null) {
       photos.clear();

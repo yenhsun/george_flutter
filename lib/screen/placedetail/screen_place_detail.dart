@@ -44,6 +44,37 @@ class _PlaceDetailScreenContainer extends StatefulWidget {
   }
 }
 
+class _IsFavoriteContainer extends StatefulWidget {
+  final FavoriteItem _favoriteItem;
+
+  _IsFavoriteContainer(this._favoriteItem);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _IsFavoriteState(_favoriteItem);
+  }
+}
+
+class _IsFavoriteState extends State<_IsFavoriteContainer> {
+  final FavoriteItem _favoriteItem;
+
+  _IsFavoriteState(this._favoriteItem);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(top: 8),
+        ),
+        _PlaceInfoRow(_favoriteItem.isFavorite ? "Favorite" : "add to Favorite",
+            _favoriteItem.isFavorite ? Icons.star : Icons.star_border, () {},
+            color: Colors.amber),
+      ],
+    );
+  }
+}
+
 class _PlaceDetailScreenState extends State<_PlaceDetailScreenContainer> {
   static const double MIN_CONTAINER_HEIGHT = 150;
   static const double MAX_CONTAINER_HEIGHT = 600;
@@ -59,6 +90,7 @@ class _PlaceDetailScreenState extends State<_PlaceDetailScreenContainer> {
   @override
   Widget build(BuildContext context) {
     debugPrint("build, _markers size: ${_markers.length}");
+    debugPrint("_favoriteItem, ${_favoriteItem.isFavorite}");
     return Scaffold(
         body: Stack(
       children: <Widget>[
@@ -181,6 +213,7 @@ class _PlaceDetailBody extends StatelessWidget {
                         height: 100,
                         child: _PlaceImageList(_favoriteItem.photos),
                       ),
+                      _IsFavoriteContainer(_favoriteItem),
                       _PlaceDetails(_favoriteItem),
                     ],
                   ),
@@ -239,38 +272,50 @@ class _OpeningHoursState extends State<_OpeningHours> {
 
   _OpeningHoursState(this._favoriteItem);
 
+  String getWeekDayString(num day) {
+    if (day == 0) {
+      return "Sun";
+    } else if (day == 1) {
+      return "Mon";
+    } else if (day == 2) {
+      return "Tue";
+    } else if (day == 3) {
+      return "Wed";
+    } else if (day == 4) {
+      return "Thr";
+    } else if (day == 5) {
+      return "Fri";
+    } else if (day == 6) {
+      return "Sat";
+    } else {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> openHoursWidget = List();
     Map<num, Widget> openHoursMap = Map();
 
     _favoriteItem.openingHours.periods.forEach((period) {
-      String day;
-      if (period.day == 0) {
-        day = "Sun";
-      } else if (period.day == 1) {
-        day = "Mon";
-      } else if (period.day == 2) {
-        day = "Tue";
-      } else if (period.day == 3) {
-        day = "Wed";
-      } else if (period.day == 4) {
-        day = "Thr";
-      } else if (period.day == 5) {
-        day = "Fri";
-      } else if (period.day == 6) {
-        day = "Sat";
-      }
+      String day = getWeekDayString(period.day);
       openHoursMap[period.day] = Row(
         children: <Widget>[
           Padding(
             padding: EdgeInsets.only(left: 80),
           ),
-          Expanded(
+          Container(
+              width: 60,
               child: Text(
-            "$day     ${period.open} ~ ${period.close}",
-            style: TextStyle(fontSize: 16),
-          )),
+                "$day",
+                style: TextStyle(fontSize: 16),
+              )),
+          Flexible(
+            child: Text(
+              "${period.open} ~ ${period.close}",
+              style: TextStyle(fontSize: 16),
+            ),
+          )
         ],
       );
     });
@@ -278,36 +323,29 @@ class _OpeningHoursState extends State<_OpeningHours> {
     for (int day = 0; day < 7; ++day) {
       Widget dayWidget = openHoursMap[day];
       if (dayWidget == null) {
-        String dayString;
-        if (day == 0) {
-          dayString = "Sun";
-        } else if (day == 1) {
-          dayString = "Mon";
-        } else if (day == 2) {
-          dayString = "Tue";
-        } else if (day == 3) {
-          dayString = "Wed";
-        } else if (day == 4) {
-          dayString = "Thr";
-        } else if (day == 5) {
-          dayString = "Fri";
-        } else if (day == 6) {
-          dayString = "Sat";
-        }
+        String dayString = getWeekDayString(day);
         dayWidget = Row(
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(left: 80),
             ),
-            Expanded(
+            Container(
+                width: 60,
                 child: Text(
-              "$dayString     Closed",
-              style: TextStyle(fontSize: 16),
-            )),
+                  "$dayString",
+                  style: TextStyle(fontSize: 16),
+                )),
+            Flexible(
+              child: Text(
+                "Closed",
+                style: TextStyle(fontSize: 16),
+              ),
+            )
           ],
         );
       }
       openHoursWidget.add(dayWidget);
+      openHoursWidget.add(Divider());
     }
 
     return Column(
@@ -317,7 +355,7 @@ class _OpeningHoursState extends State<_OpeningHours> {
           onPressed: () {
             setState(() {
               if (_expandHeight == 0) {
-                _expandHeight = 300;
+                _expandHeight = 250;
               } else {
                 _expandHeight = 0;
               }
@@ -360,8 +398,10 @@ class _PlaceInfoRow extends StatelessWidget {
   final String _text;
   final IconData _icon;
   final Function _click;
+  final Color color;
 
-  _PlaceInfoRow(this._text, this._icon, this._click);
+  _PlaceInfoRow(this._text, this._icon, this._click,
+      {this.color = Colors.blue});
 
   @override
   Widget build(BuildContext context) {
@@ -371,7 +411,7 @@ class _PlaceInfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Icon(_icon, color: Colors.blue),
+          Icon(_icon, color: color),
           Padding(padding: EdgeInsets.only(left: 40)),
           Flexible(
             child: Text(
