@@ -62,6 +62,9 @@ class FavoriteItem {
   @JsonKey(ignore: true)
   List<Review> reviews;
 
+  @JsonKey(ignore: true)
+  bool openNow;
+
   FavoriteItem();
 
   void apply(PlaceDetails details) {
@@ -81,6 +84,7 @@ class FavoriteItem {
       this.openingHours.periods.add(OpeningHoursPeriod(
           period.open.time, period.close.time, period.open.day));
     });
+    this.openNow = details.openingHours.openNow;
     this.reviews = details.reviews;
 
     if (details.photos != null) {
@@ -104,6 +108,7 @@ class FavoriteItem {
     item.lng = result.geometry.location.lng;
     item.permanentlyClosed = result.permanentlyClosed;
     item.scope = result.scope;
+    item.openNow = result.openingHours.openNow;
 
     if (result.photos != null) {
       result.photos.forEach((photo) {

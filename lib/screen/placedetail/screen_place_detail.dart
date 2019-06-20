@@ -23,6 +23,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PlaceDetailScreen extends StatelessWidget {
   @override
@@ -200,40 +201,187 @@ class _PlaceDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Column(
       children: <Widget>[
-        FlatButton(
-          onPressed: () {},
+        Divider(),
+        _PlaceInfoRow(_favoriteItem.address, Icons.place, () {}),
+        Divider(),
+        _PlaceInfoRow(_favoriteItem.internationalPhoneNumber, Icons.dialpad,
+            () {
+          launch("tel://${_favoriteItem.internationalPhoneNumber}");
+        }),
+        Divider(),
+        _PlaceInfoRow(_favoriteItem.website, Icons.language, () {
+          launch("${_favoriteItem.website}");
+        }),
+        Divider(),
+        _OpeningHours(_favoriteItem),
+        Divider(),
+      ],
+    );
+  }
+}
+
+class _OpeningHours extends StatefulWidget {
+  final FavoriteItem _favoriteItem;
+
+  _OpeningHours(this._favoriteItem);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _OpeningHoursState(_favoriteItem);
+  }
+}
+
+class _OpeningHoursState extends State<_OpeningHours> {
+  final FavoriteItem _favoriteItem;
+  double _expandHeight = 0;
+
+  _OpeningHoursState(this._favoriteItem);
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> openHoursWidget = List();
+    Map<num, Widget> openHoursMap = Map();
+
+    _favoriteItem.openingHours.periods.forEach((period) {
+      String day;
+      if (period.day == 0) {
+        day = "Sun";
+      } else if (period.day == 1) {
+        day = "Mon";
+      } else if (period.day == 2) {
+        day = "Tue";
+      } else if (period.day == 3) {
+        day = "Wed";
+      } else if (period.day == 4) {
+        day = "Thr";
+      } else if (period.day == 5) {
+        day = "Fri";
+      } else if (period.day == 6) {
+        day = "Sat";
+      }
+      openHoursMap[period.day] = Row(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 80),
+          ),
+          Expanded(
+              child: Text(
+            "$day     ${period.open} ~ ${period.close}",
+            style: TextStyle(fontSize: 16),
+          )),
+        ],
+      );
+    });
+
+    for (int day = 0; day < 7; ++day) {
+      Widget dayWidget = openHoursMap[day];
+      if (dayWidget == null) {
+        String dayString;
+        if (day == 0) {
+          dayString = "Sun";
+        } else if (day == 1) {
+          dayString = "Mon";
+        } else if (day == 2) {
+          dayString = "Tue";
+        } else if (day == 3) {
+          dayString = "Wed";
+        } else if (day == 4) {
+          dayString = "Thr";
+        } else if (day == 5) {
+          dayString = "Fri";
+        } else if (day == 6) {
+          dayString = "Sat";
+        }
+        dayWidget = Row(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(left: 80),
+            ),
+            Expanded(
+                child: Text(
+              "$dayString     Closed",
+              style: TextStyle(fontSize: 16),
+            )),
+          ],
+        );
+      }
+      openHoursWidget.add(dayWidget);
+    }
+
+    return Column(
+      children: <Widget>[
+        MaterialButton(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onPressed: () {
+            setState(() {
+              if (_expandHeight == 0) {
+                _expandHeight = 300;
+              } else {
+                _expandHeight = 0;
+              }
+            });
+          },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(
-                  left: 16,
-                ),
-              ),
-              Icon(
-                Icons.phone,
-                color: Colors.blue,
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 40),
-              ),
+              Icon(Icons.access_time, color: Colors.blue),
+              Padding(padding: EdgeInsets.only(left: 40)),
               Flexible(
                 child: Text(
-                  _favoriteItem.internationalPhoneNumber,
-                  style: TextStyle(fontSize: 16),
+                  _favoriteItem.openNow ? "Open Now" : "Closed",
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: _favoriteItem.openNow ? Colors.black : Colors.red),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              Icon(_expandHeight == 0
+                  ? Icons.arrow_drop_down
+                  : Icons.arrow_drop_up)
             ],
           ),
         ),
-        Text("123"),
-        Text("123"),
-        Text("123"),
+        AnimatedContainer(
+          duration: Duration(milliseconds: 250),
+          height: _expandHeight,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: openHoursWidget,
+          ),
+        )
       ],
+    );
+  }
+}
+
+class _PlaceInfoRow extends StatelessWidget {
+  final String _text;
+  final IconData _icon;
+  final Function _click;
+
+  _PlaceInfoRow(this._text, this._icon, this._click);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialButton(
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      onPressed: _click,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Icon(_icon, color: Colors.blue),
+          Padding(padding: EdgeInsets.only(left: 40)),
+          Flexible(
+            child: Text(
+              _text,
+              style: TextStyle(fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -249,6 +397,9 @@ class _PlaceImageList extends StatelessWidget {
     _photos.forEach((url) {
       placeImages.add(
         CachedNetworkImage(
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
             imageUrl: url,
             placeholder: Container(
               width: 100,

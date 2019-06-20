@@ -22,7 +22,7 @@ Observable<LatLng> getUserLocation() {
     debugPrint("lat: $lat, lng: $lng");
     final center = LatLng(lat, lng);
     return center;
-  });
+  }).onErrorReturn(LatLng(0, 0));
 }
 
 Observable<PlacesSearchResponse> findNearBy(LatLng center,
