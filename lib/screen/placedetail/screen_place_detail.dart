@@ -598,13 +598,13 @@ class _PlaceImageList extends StatelessWidget {
           height: 100,
           fit: BoxFit.cover,
           imageUrl: url,
-//          placeholder: Container(
-//            width: 100,
-//            height: 100,
-//            child: Center(
-//              child: CircularProgressIndicator(),
-//            ),
-//          ),
+          placeholder: (context, url) => Container(
+                width: 100,
+                height: 100,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
         ),
       );
     });
