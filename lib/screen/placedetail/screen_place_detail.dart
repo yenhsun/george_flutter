@@ -110,6 +110,7 @@ class _PlaceDetailScreenState extends State<_PlaceDetailScreenContainer> {
         Align(
             alignment: Alignment.bottomCenter,
             child: AnimatedContainer(
+              color: Colors.white,
               height: _containerHeight,
               duration: Duration(milliseconds: 200),
               child: Column(
@@ -192,8 +193,11 @@ class _PlaceDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Center(
-        child: CircularProgressBar(
-          text: "Loading ${_favoriteItem.displayName} information...",
+        child: Container(
+          padding: EdgeInsets.all(8),
+          child: CircularProgressBar(
+            text: "Loading ${_favoriteItem.displayName} information...",
+          ),
         ),
       );
     } else {
