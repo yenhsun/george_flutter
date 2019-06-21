@@ -1,5 +1,6 @@
 import 'package:fimber/fimber.dart';
 import 'package:flutter/material.dart';
+import 'package:george_flutter/model/model_favorite.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -138,4 +139,20 @@ class AuthData {
   final GoogleSignInAuthentication googleSignInAuthentication;
 
   AuthData(this.googleSignInAccount, this.googleSignInAuthentication);
+}
+
+Observable<dynamic> addNewFavoriteItem(
+    FavoriteList favoriteList, FavoriteItem favoriteItem) {
+  return Observable.fromFuture(favoriteList.snapshot.reference
+      .collection(FireStoreConstants.collectionFavoriteItem)
+      .document(favoriteItem.placeId)
+      .setData(favoriteItem.toJson(), merge: true));
+}
+
+Observable<dynamic> removeFavoriteItem(
+    FavoriteList favoriteList, FavoriteItem favoriteItem) {
+  return Observable.fromFuture(favoriteList.snapshot.reference
+      .collection(FireStoreConstants.collectionFavoriteItem)
+      .document(favoriteItem.placeId)
+      .delete());
 }

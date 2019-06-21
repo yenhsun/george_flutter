@@ -37,7 +37,6 @@ FavoriteItem _$FavoriteItemFromJson(Map<String, dynamic> json) {
     ..displayName = json['displayName'] as String
     ..priceLevel = _$enumDecodeNullable(_$PriceLevelEnumMap, json['priceLevel'])
     ..rating = json['rating'] as num
-    ..isFavorite = json['isFavorite'] as bool
     ..address = json['address'] as String
     ..photos = (json['photos'] as List)?.map((e) => e as String)?.toList()
     ..lat = (json['lat'] as num)?.toDouble()
@@ -48,9 +47,6 @@ FavoriteItem _$FavoriteItemFromJson(Map<String, dynamic> json) {
     ..internationalPhoneNumber = json['internationalPhoneNumber'] as String
     ..website = json['website'] as String
     ..url = json['url'] as String
-    ..openingHours = json['openingHours'] == null
-        ? null
-        : OpeningHours.fromJson(json['openingHours'] as Map<String, dynamic>)
     ..types = (json['types'] as List)?.map((e) => e as String)?.toList();
 }
 
@@ -61,7 +57,6 @@ Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
       'displayName': instance.displayName,
       'priceLevel': _$PriceLevelEnumMap[instance.priceLevel],
       'rating': instance.rating,
-      'isFavorite': instance.isFavorite,
       'address': instance.address,
       'photos': instance.photos,
       'lat': instance.lat,
@@ -72,7 +67,6 @@ Map<String, dynamic> _$FavoriteItemToJson(FavoriteItem instance) =>
       'internationalPhoneNumber': instance.internationalPhoneNumber,
       'website': instance.website,
       'url': instance.url,
-      'openingHours': instance.openingHours,
       'types': instance.types
     };
 

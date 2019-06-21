@@ -41,6 +41,7 @@ class FavoriteItem {
   String displayName;
   PriceLevel priceLevel;
   num rating;
+  @JsonKey(ignore: true)
   bool isFavorite = false;
   String address;
   List<String> photos = List<String>();
@@ -55,6 +56,7 @@ class FavoriteItem {
   String website;
   String url;
 
+  @JsonKey(ignore: true)
   OpeningHours openingHours;
 
   List<String> types = List();
@@ -80,10 +82,12 @@ class FavoriteItem {
     this.url = details.url;
 
     this.openingHours = OpeningHours();
-    details.openingHours.periods.forEach((period) {
-      this.openingHours.periods.add(OpeningHoursPeriod(
-          period.open.time, period.close.time, period.open.day));
-    });
+    if (details.openingHours != null) {
+      details.openingHours.periods.forEach((period) {
+        this.openingHours.periods.add(OpeningHoursPeriod(
+            period.open.time, period.close.time, period.open.day));
+      });
+    }
     this.openNow = details.openingHours.openNow;
     this.reviews = details.reviews;
     this.lat = details.geometry.location.lat;

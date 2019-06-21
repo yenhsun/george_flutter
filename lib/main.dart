@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:george_flutter/screen/favoriteitem/screen_favorite_item.dart';
 import 'package:george_flutter/screen/favoritelist/screen_favorite_list.dart';
@@ -15,6 +17,7 @@ const kGoogleApiKey = "AIzaSyBuUW5HBbO_UjaRWaYeVb-p5WC_Qa4HLSc";
 Future main() async {
   Crashlytics.instance.enableInDevMode = true;
 
+  // Pass all uncaught errors to Crashlytics.
   FlutterError.onError = (FlutterErrorDetails details) {
     Crashlytics.instance.onError(details);
   };

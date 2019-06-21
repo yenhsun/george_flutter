@@ -26,39 +26,47 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PlaceDetailScreen extends StatelessWidget {
+  static const KEY_FAVORITE_LIST = "KEY_FAVORITE_LIST";
+  static const KEY_FAVORITE_ITEM = "KEY_FAVORITE_ITEM";
+
   @override
   Widget build(BuildContext context) {
-    FavoriteItem item = ModalRoute.of(context).settings.arguments;
-    return _PlaceDetailScreenContainer(item);
+    Map<String, Object> map = ModalRoute.of(context).settings.arguments;
+    FavoriteItem item = map[KEY_FAVORITE_ITEM];
+    FavoriteList list = map[KEY_FAVORITE_LIST];
+    return _PlaceDetailScreenContainer(item, list);
   }
 }
 
 class _PlaceDetailScreenContainer extends StatefulWidget {
   final FavoriteItem _favoriteItem;
+  final FavoriteList _favoriteList;
 
-  _PlaceDetailScreenContainer(this._favoriteItem);
+  _PlaceDetailScreenContainer(this._favoriteItem, this._favoriteList);
 
   @override
   State<StatefulWidget> createState() {
-    return _PlaceDetailScreenState(_favoriteItem);
+    return _PlaceDetailScreenState(_favoriteItem, _favoriteList);
   }
 }
 
 class _IsFavoriteContainer extends StatefulWidget {
   final FavoriteItem _favoriteItem;
+  final FavoriteList _favoriteList;
 
-  _IsFavoriteContainer(this._favoriteItem);
+  _IsFavoriteContainer(this._favoriteItem, this._favoriteList);
 
   @override
   State<StatefulWidget> createState() {
-    return _IsFavoriteState(_favoriteItem);
+    return _IsFavoriteState(_favoriteItem, _favoriteList);
   }
 }
 
 class _IsFavoriteState extends State<_IsFavoriteContainer> {
   final FavoriteItem _favoriteItem;
+  final FavoriteList _favoriteList;
 
-  _IsFavoriteState(this._favoriteItem);
+  _IsFavoriteState(this._favoriteItem, this._favoriteList);
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +76,22 @@ class _IsFavoriteState extends State<_IsFavoriteContainer> {
           padding: EdgeInsets.only(top: 8),
         ),
         _PlaceInfoRow(_favoriteItem.isFavorite ? "Favorite" : "add to Favorite",
-            _favoriteItem.isFavorite ? Icons.star : Icons.star_border, () {},
-            color: Colors.amber),
+            _favoriteItem.isFavorite ? Icons.star : Icons.star_border, () {
+          debugPrint("${_favoriteList.snapshot.reference.path}");
+          if (_favoriteItem.isFavorite) {
+            removeFavoriteItem(_favoriteList, _favoriteItem).listen((data) {
+              setState(() {
+                _favoriteItem.isFavorite = false;
+              });
+            });
+          } else {
+            addNewFavoriteItem(_favoriteList, _favoriteItem).listen((data) {
+              setState(() {
+                _favoriteItem.isFavorite = true;
+              });
+            });
+          }
+        }, color: Colors.amber),
       ],
     );
   }
@@ -77,15 +99,16 @@ class _IsFavoriteState extends State<_IsFavoriteContainer> {
 
 class _PlaceDetailScreenState extends State<_PlaceDetailScreenContainer> {
   static const double MIN_CONTAINER_HEIGHT = 150;
-  static const double MAX_CONTAINER_HEIGHT = 600;
+  static const double MAX_CONTAINER_HEIGHT = 460;
   Completer<GoogleMapController> _controller = Completer();
   final FavoriteItem _favoriteItem;
+  final FavoriteList _favoriteList;
   bool _isLoading = false;
   PublishSubject<void> _moveMyLocationToCenterIntent = PublishSubject();
   Set<Marker> _markers = Set();
   double _containerHeight = MIN_CONTAINER_HEIGHT;
 
-  _PlaceDetailScreenState(this._favoriteItem);
+  _PlaceDetailScreenState(this._favoriteItem, this._favoriteList);
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +160,7 @@ class _PlaceDetailScreenState extends State<_PlaceDetailScreenContainer> {
                       )
                     ],
                   ),
-                  _PlaceDetailBody(_isLoading, _favoriteItem),
+                  _PlaceDetailBody(_isLoading, _favoriteItem, _favoriteList),
                 ],
               ),
             )),
@@ -185,9 +208,10 @@ class _PlaceDetailScreenState extends State<_PlaceDetailScreenContainer> {
 
 class _PlaceDetailBody extends StatelessWidget {
   final FavoriteItem _favoriteItem;
+  final FavoriteList _favoriteList;
   final bool _isLoading;
 
-  _PlaceDetailBody(this._isLoading, this._favoriteItem);
+  _PlaceDetailBody(this._isLoading, this._favoriteItem, this._favoriteList);
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +241,7 @@ class _PlaceDetailBody extends StatelessWidget {
                         height: 100,
                         child: _PlaceImageList(_favoriteItem.photos),
                       ),
-                      _IsFavoriteContainer(_favoriteItem),
+                      _IsFavoriteContainer(_favoriteItem, _favoriteList),
                       _PlaceDetails(_favoriteItem),
                     ],
                   ),
@@ -228,6 +252,132 @@ class _PlaceDetailBody extends StatelessWidget {
         ),
       );
     }
+  }
+}
+
+class _Reviews extends StatefulWidget {
+  final FavoriteItem _favoriteItem;
+
+  _Reviews(this._favoriteItem);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _ReviewsState(_favoriteItem);
+  }
+}
+
+class _ReviewsState extends State<_Reviews> {
+  final FavoriteItem _favoriteItem;
+  double _expandHeight = 0;
+
+  _ReviewsState(this._favoriteItem);
+
+  List<Widget> reviewWidgets = List();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        MaterialButton(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onPressed: () {
+            setState(() {
+              if (_expandHeight == 0) {
+                _expandHeight = 200;
+              } else {
+                _expandHeight = 0;
+              }
+            });
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Icon(Icons.textsms, color: Colors.blue),
+              Padding(padding: EdgeInsets.only(left: 40)),
+              Flexible(
+                child: Text(
+                  "Review",
+                  style: TextStyle(fontSize: 16, color: Colors.black),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(_expandHeight == 0
+                  ? Icons.arrow_drop_down
+                  : Icons.arrow_drop_up)
+            ],
+          ),
+        ),
+        AnimatedContainer(
+          duration: Duration(milliseconds: 250),
+          height: _expandHeight,
+          child: ListView.builder(
+            itemBuilder: (context, index) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Divider(),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(left: 16),
+                      ),
+                      Flexible(
+                        child: Text(
+                          "${_favoriteItem.reviews[index].text}",
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 16),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+            itemCount: _favoriteItem.reviews.length,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(bottom: 16),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint("size: ${_favoriteItem.reviews.length}");
+
+    _favoriteItem.reviews.forEach((review) {
+      reviewWidgets.add(Row(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 16),
+          ),
+          Flexible(
+            child: Text(
+              "${review.text}",
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 16),
+          ),
+        ],
+      ));
+      reviewWidgets.add(Divider());
+    });
+    reviewWidgets.add(Padding(padding: EdgeInsets.only(bottom: 60)));
   }
 }
 
@@ -254,6 +404,7 @@ class _PlaceDetails extends StatelessWidget {
         Divider(),
         _OpeningHours(_favoriteItem),
         Divider(),
+        _Reviews(_favoriteItem),
       ],
     );
   }
@@ -349,7 +500,9 @@ class _OpeningHoursState extends State<_OpeningHours> {
         );
       }
       openHoursWidget.add(dayWidget);
-      openHoursWidget.add(Divider());
+      if (day < 6) {
+        openHoursWidget.add(Divider());
+      }
     }
 
     return Column(
