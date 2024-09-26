@@ -17,12 +17,12 @@ GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
 Observable<LatLng> getUserLocation() {
   return Observable.fromFuture(LocationManager.Location().getLocation())
       .map((data) {
-    final lat = data["latitude"];
-    final lng = data["longitude"];
+    final lat = data.latitude;
+    final lng = data.longitude;
     debugPrint("lat: $lat, lng: $lng");
     final center = LatLng(lat, lng);
     return center;
-  });
+  }).onErrorReturn(LatLng(0, 0));
 }
 
 Observable<PlacesSearchResponse> findNearBy(LatLng center,

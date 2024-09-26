@@ -4,6 +4,7 @@ import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as LocationManager;
+import 'package:location/location.dart';
 import 'place_detail.dart';
 
 const kGoogleApiKey = "AIzaSyBuUW5HBbO_UjaRWaYeVb-p5WC_Qa4HLSc";
@@ -62,16 +63,16 @@ class HomeState extends State<Home> {
         ),
         body: Column(
           children: <Widget>[
-            Container(
-              child: SizedBox(
-                  height: 200.0,
-                  child: GoogleMap(
-                      onMapCreated: _onMapCreated,
-                      options: GoogleMapOptions(
-                          myLocationEnabled: true,
-                          cameraPosition:
-                          const CameraPosition(target: LatLng(0.0, 0.0))))),
-            ),
+//            Container(
+//              child: SizedBox(
+//                  height: 200.0,
+//                  child: GoogleMap(
+//                      onMapCreated: _onMapCreated,
+//                      options: GoogleMapOptions(
+//                          myLocationEnabled: true,
+//                          cameraPosition:
+//                          const CameraPosition(target: LatLng(0.0, 0.0))))),
+//            ),
             Expanded(child: expandedChild)
           ],
         ));
@@ -91,12 +92,12 @@ class HomeState extends State<Home> {
   }
 
   Future<LatLng> getUserLocation() async {
-    var currentLocation = <String, double>{};
+    LocationData currentLocation;
     final location = LocationManager.Location();
     try {
       currentLocation = await location.getLocation();
-      final lat = currentLocation["latitude"];
-      final lng = currentLocation["longitude"];
+      final lat = currentLocation.longitude;
+      final lng = currentLocation.latitude;
       final center = LatLng(lat, lng);
       return center;
     } on Exception {
@@ -111,23 +112,23 @@ class HomeState extends State<Home> {
       this.errorMessage = null;
     });
 
-    final location = Location(center.latitude, center.longitude);
-    final result = await _places.searchNearbyWithRadius(location, 2500);
-    setState(() {
-      this.isLoading = false;
-      if (result.status == "OK") {
-        this.places = result.results;
-        result.results.forEach((f) {
-          final markerOptions = MarkerOptions(
-              position:
-              LatLng(f.geometry.location.lat, f.geometry.location.lng),
-              infoWindowText: InfoWindowText("${f.name}", "${f.types?.first}"));
-          mapController.addMarker(markerOptions);
-        });
-      } else {
-        this.errorMessage = result.errorMessage;
-      }
-    });
+//    final location = Location(center.latitude, center.longitude);
+//    final result = await _places.searchNearbyWithRadius(location, 2500);
+//    setState(() {
+//      this.isLoading = false;
+//      if (result.status == "OK") {
+//        this.places = result.results;
+//        result.results.forEach((f) {
+////          final markerOptions = MarkerOptions(
+////              position:
+////              LatLng(f.geometry.location.lat, f.geometry.location.lng),
+////              infoWindowText: InfoWindowText("${f.name}", "${f.types?.first}"));
+////          mapController.addMarker(markerOptions);
+//        });
+//      } else {
+//        this.errorMessage = result.errorMessage;
+//      }
+//    });
   }
 
   void onError(PlacesAutocompleteResponse response) {
@@ -139,19 +140,19 @@ class HomeState extends State<Home> {
   Future<void> _handlePressButton() async {
     try {
       final center = await getUserLocation();
-      Prediction p = await PlacesAutocomplete.show(
-          context: context,
-          strictbounds: center == null ? false : true,
-          apiKey: kGoogleApiKey,
-          onError: onError,
-          mode: Mode.fullscreen,
-          language: "en",
-          location: center == null
-              ? null
-              : Location(center.latitude, center.longitude),
-          radius: center == null ? null : 10000);
-
-      showDetailPlace(p.placeId);
+//      Prediction p = await PlacesAutocomplete.show(
+//          context: context,
+//          strictbounds: center == null ? false : true,
+//          apiKey: kGoogleApiKey,
+//          onError: onError,
+//          mode: Mode.fullscreen,
+//          language: "en",
+//          location: center == null
+//              ? null
+//              : Location(center.latitude, center.longitude),
+//          radius: center == null ? null : 10000);
+//
+//      showDetailPlace(p.placeId);
     } catch (e) {
       return;
     }

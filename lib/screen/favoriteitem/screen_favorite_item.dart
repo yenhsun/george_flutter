@@ -9,6 +9,7 @@ import 'package:toast/toast.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:intl/intl.dart';
 
+import '../../main.dart';
 import '../route_paths.dart';
 
 class FavoriteItemScreen extends StatelessWidget {
@@ -38,6 +39,8 @@ class _FavoriteItemScreenContainerState
       PublishSubject<FavoriteItem>();
   PublishSubject<FavoriteItem> _removeFromFavoriteIntent =
       PublishSubject<FavoriteItem>();
+  PublishSubject<FavoriteItem> _clickFavoriteIntent =
+      PublishSubject<FavoriteItem>();
 
   _FavoriteItemScreenContainerState(this._favoriteList);
 
@@ -46,6 +49,7 @@ class _FavoriteItemScreenContainerState
     super.dispose();
     _addToFavoriteIntent.close();
     _removeFromFavoriteIntent.close();
+    _clickFavoriteIntent.close();
   }
 
   @override
@@ -59,8 +63,12 @@ class _FavoriteItemScreenContainerState
           children: <Widget>[
             Container(
               child: Expanded(
-                child: _FavoriteItemScreenContainerBranch(_favoriteItems,
-                    this._addToFavoriteIntent, this._removeFromFavoriteIntent),
+                child: _FavoriteItemScreenContainerBranch(
+                    _favoriteItems,
+                    this._addToFavoriteIntent,
+                    this._removeFromFavoriteIntent,
+                    this._clickFavoriteIntent,
+                    _favoriteList),
               ),
             ),
             SizedBox(
@@ -87,14 +95,13 @@ class _FavoriteItemScreenContainerState
   @override
   void initState() {
     super.initState();
-
     _refreshFavoriteItemList();
 
     _removeFromFavoriteIntent.listen((item) {
       Observable.fromFuture(_favoriteList.snapshot.reference
-          .collection(FireStoreConstants.collectionFavoriteItem)
-          .document(item.placeId)
-          .delete())
+              .collection(FireStoreConstants.collectionFavoriteItem)
+              .document(item.placeId)
+              .delete())
           .listen((dynamic) {
         debugPrint("delete done, ${item.placeId}");
 
@@ -102,6 +109,10 @@ class _FavoriteItemScreenContainerState
           _favoriteItems.remove(item);
         });
       });
+    });
+
+    _clickFavoriteIntent.listen((item) {
+      _refreshFavoriteItemList();
     });
   }
 
@@ -113,7 +124,9 @@ class _FavoriteItemScreenContainerState
       setState(() {
         _favoriteItems.clear();
         querySnapshot.documents.forEach((document) {
-          _favoriteItems.add(FavoriteItem.fromJson(document.data));
+          var item = FavoriteItem.fromJson(document.data);
+          item.isFavorite = true;
+          _favoriteItems.add(item);
         });
       });
     });
@@ -124,16 +137,27 @@ class _FavoriteItemScreenContainerBranch extends StatelessWidget {
   final List<FavoriteItem> _favoriteItems;
   final PublishSubject<FavoriteItem> _addToFavoriteIntent;
   final PublishSubject<FavoriteItem> _removeFromFavoriteIntent;
+  final PublishSubject<FavoriteItem> _clickIntent;
+  final FavoriteList _favoriteList;
 
-  _FavoriteItemScreenContainerBranch(this._favoriteItems,
-      this._addToFavoriteIntent, this._removeFromFavoriteIntent);
+  _FavoriteItemScreenContainerBranch(
+      this._favoriteItems,
+      this._addToFavoriteIntent,
+      this._removeFromFavoriteIntent,
+      this._clickIntent,
+      this._favoriteList);
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       itemBuilder: (context, index) {
-        return FavoriteItemRow(_favoriteItems[index], _addToFavoriteIntent,
-            _removeFromFavoriteIntent);
+        return FavoriteItemRow(
+          _favoriteItems[index],
+          _addToFavoriteIntent,
+          _removeFromFavoriteIntent,
+          _favoriteList,
+          clickIntent: _clickIntent,
+        );
       },
       itemCount: _favoriteItems.length,
     );

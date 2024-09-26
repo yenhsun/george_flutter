@@ -60,16 +60,16 @@ class PlaceDetailState extends State<PlaceDetailWidget> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Container(
-              child: SizedBox(
-                height: 200.0,
-                child: GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  options: GoogleMapOptions(
-                      myLocationEnabled: true,
-                      cameraPosition: CameraPosition(target: center, zoom: 15.0)),
-                ),
-              )),
+//          Container(
+//              child: SizedBox(
+//                height: 200.0,
+//                child: GoogleMap(
+//                  onMapCreated: _onMapCreated,
+//                  options: GoogleMapOptions(
+//                      myLocationEnabled: true,
+//                      cameraPosition: CameraPosition(target: center, zoom: 15.0)),
+//                ),
+//              )),
           Expanded(
             child: buildPlaceDetailList(placeDetail),
           )
@@ -113,11 +113,11 @@ class PlaceDetailState extends State<PlaceDetailWidget> {
     final lat = location.lat;
     final lng = location.lng;
     final center = LatLng(lat, lng);
-    var markerOptions = MarkerOptions(
-        position: center,
-        infoWindowText: InfoWindowText(
-            "${placeDetail.name}", "${placeDetail.formattedAddress}"));
-    mapController.addMarker(markerOptions);
+//    var markerOptions = MarkerOptions(
+//        position: center,
+//        infoWindowText: InfoWindowText(
+//            "${placeDetail.name}", "${placeDetail.formattedAddress}"));
+//    mapController.addMarker(markerOptions);
     mapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: center, zoom: 15.0)));
   }

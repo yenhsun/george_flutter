@@ -241,6 +241,7 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
           ),
           Expanded(
             child: _FindPlacesScreenContainerBranch(
+                _favoriteList,
                 _isLoading,
                 _favoriteItemList,
                 _loadMoreIntent,
@@ -328,24 +329,15 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
     });
     _addToFavoriteIntent.listen((item) {
       item.isFavorite = true;
-      Observable.fromFuture(_favoriteList.snapshot.reference
-              .collection(FireStoreConstants.collectionFavoriteItem)
-              .document(item.placeId)
-              .setData(item.toJson(), merge: true))
-          .listen((snapshot) {
+      addNewFavoriteItem(_favoriteList, item).listen((snapshot) {
         debugPrint("add done, ${item.placeId}");
-
         setState(() {
           favoriteItemId.add(item.placeId);
         });
       });
     });
     _removeFromFavoriteIntent.listen((item) {
-      Observable.fromFuture(_favoriteList.snapshot.reference
-              .collection(FireStoreConstants.collectionFavoriteItem)
-              .document(item.placeId)
-              .delete())
-          .listen((dynamic) {
+      removeFavoriteItem(_favoriteList, item).listen((dynamic) {
         debugPrint("delete done, ${item.placeId}");
 
         setState(() {
@@ -358,6 +350,7 @@ class _FindPlaceScreenContainerState extends State<_FindPlaceScreenContainer> {
 }
 
 class _FindPlacesScreenContainerBranch extends StatelessWidget {
+  final FavoriteList _favoriteList;
   final bool _isLoading;
   final List<FavoriteItem> _favoriteItemList;
   final PublishSubject<dynamic> _loadMoreIntent;
@@ -367,6 +360,7 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
   final PublishSubject<FavoriteItem> _removeFromFavoriteIntent;
 
   _FindPlacesScreenContainerBranch(
+      this._favoriteList,
       this._isLoading,
       this._favoriteItemList,
       this._loadMoreIntent,
@@ -381,6 +375,7 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
       return CircularProgressBar(text: "Request near by data...");
     } else if (_favoriteItemList.isNotEmpty) {
       return _FavoriteItemList(
+          _favoriteList,
           _favoriteItemList,
           _loadMoreIntent,
           _nextPageToken,
@@ -396,6 +391,7 @@ class _FindPlacesScreenContainerBranch extends StatelessWidget {
 }
 
 class _FavoriteItemList extends StatelessWidget {
+  final FavoriteList _favoriteList;
   final List<FavoriteItem> _favoriteItemList;
   final PublishSubject<dynamic> _loadMoreIntent;
   final String _nextPageToken;
@@ -404,6 +400,7 @@ class _FavoriteItemList extends StatelessWidget {
   final PublishSubject<FavoriteItem> _removeFromFavoriteIntent;
 
   _FavoriteItemList(
+      this._favoriteList,
       this._favoriteItemList,
       this._loadMoreIntent,
       this._nextPageToken,
@@ -417,7 +414,7 @@ class _FavoriteItemList extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index < _favoriteItemList.length) {
           return FavoriteItemRow(_favoriteItemList[index], _addToFavoriteIntent,
-              _removeFromFavoriteIntent);
+              _removeFromFavoriteIntent, _favoriteList);
         } else {
           if (!_isLoadingMore) {
             return FlatButton(
